@@ -1,0 +1,45 @@
+import pygame
+
+if __name__ == '__main__':
+    pygame.init()
+    size = width, height = 1200, 800
+    screen = pygame.display.set_mode(size)
+    bg = pygame.image.load("images/bg.png")
+    fps = 10
+    clock = pygame.time.Clock()
+    bg_x = 0
+    walk_left = [
+        pygame.image.load("images/left/left1.png"),
+        pygame.image.load("images/left/left2.png"),
+        pygame.image.load("images/left/left3.png"),
+        pygame.image.load("images/left/left4.png")
+    ]
+    walk_right = [
+        pygame.image.load("images/right/right1.png"),
+        pygame.image.load("images/right/right2.png"),
+        pygame.image.load("images/right/right3.png"),
+        pygame.image.load("images/right/right4.png")
+    ]
+    player_anim_count = 0
+
+    bg_sound = pygame.mixer.Sound("sounds/les.mp3")
+    bg_sound.play()
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        screen.blit(bg, (bg_x, 0))
+        screen.blit(bg, (bg_x + 1200, 0))
+        screen.blit(walk_right[player_anim_count], (100, 625))
+        if player_anim_count == 3:
+            player_anim_count = 0
+        else:
+            player_anim_count += 1
+        bg_x -= 2
+        if bg_x == -1200:
+            bg_x = 0
+        clock.tick(fps)
+        pygame.display.update()
+    pygame.quit()
