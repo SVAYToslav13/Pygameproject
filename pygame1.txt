@@ -30,7 +30,7 @@ if __name__ == '__main__':
     player_y = 625
 
     is_jump = False
-    jump_count = 7
+    jump_count = 10
 
     player_pos = False
 
@@ -59,6 +59,20 @@ if __name__ == '__main__':
             player_x -= player_speed
         elif keys[pygame.K_RIGHT]:
             player_x += player_speed
+
+        if not is_jump:
+            if keys[pygame.K_SPACE]:
+                is_jump = True
+        else:
+            if jump_count >= -10:
+                if jump_count > 0:
+                    player_y -= (jump_count) ** 2 / 2
+                else:
+                    player_y += (jump_count) ** 2 / 2
+                jump_count -= 1
+            else:
+                jump_count = 10
+                is_jump = False
 
         if player_anim_count == 3:
             player_anim_count = 0
