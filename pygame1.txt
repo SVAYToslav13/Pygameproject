@@ -1,0 +1,72 @@
+import pygame
+
+if __name__ == '__main__':
+    pygame.init()
+    size = width, height = 1200, 800
+    screen = pygame.display.set_mode(size)
+    bg = pygame.image.load("images/bg.png")
+    fps = 20
+    clock = pygame.time.Clock()
+    bg_x = 0
+    walk_left = [
+        pygame.image.load("images/left/left1.png"),
+        pygame.image.load("images/left/left2.png"),
+        pygame.image.load("images/left/left3.png"),
+        pygame.image.load("images/left/left4.png")
+    ]
+    walk_right = [
+        pygame.image.load("images/right/right1.png"),
+        pygame.image.load("images/right/right2.png"),
+        pygame.image.load("images/right/right3.png"),
+        pygame.image.load("images/right/right4.png")
+    ]
+    player_anim_count = 0
+
+    bg_sound = pygame.mixer.Sound("sounds/les.mp3")
+    bg_sound.play()
+
+    player_speed = 15
+    player_x = 100
+    player_y = 625
+
+    is_jump = False
+    jump_count = 7
+
+    player_pos = False
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        screen.blit(bg, (bg_x, 0))
+        screen.blit(bg, (bg_x + 1200, 0))
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            screen.blit(walk_left[player_anim_count], (player_x, player_y))
+            player_pos = True
+        elif keys[pygame.K_RIGHT]:
+            screen.blit(walk_right[player_anim_count], (player_x, player_y))
+            player_pos = False
+        else:
+            if player_pos:
+                screen.blit(pygame.image.load("images/left/left1.png"), (player_x, player_y))
+            else:
+                screen.blit(pygame.image.load("images/right/right1.png"), (player_x, player_y))
+
+        if keys[pygame.K_LEFT] and player_x > 0:
+            player_x -= player_speed
+        elif keys[pygame.K_RIGHT]:
+            player_x += player_speed
+
+        if player_anim_count == 3:
+            player_anim_count = 0
+        else:
+            player_anim_count += 1
+        bg_x -= 2
+        if bg_x == -1200:
+            bg_x = 0
+        clock.tick(fps)
+        pygame.display.update()
+    pygame.quit()
