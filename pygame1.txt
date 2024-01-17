@@ -4,22 +4,23 @@ if __name__ == '__main__':
     pygame.init()
     size = width, height = 1200, 800
     screen = pygame.display.set_mode(size)
-    bg = pygame.image.load("images/bg.png")
+    bg = pygame.image.load("images/bg.png").convert()
     fps = 20
     clock = pygame.time.Clock()
     bg_x = 0
     walk_left = [
-        pygame.image.load("images/left/left1.png"),
-        pygame.image.load("images/left/left2.png"),
-        pygame.image.load("images/left/left3.png"),
-        pygame.image.load("images/left/left4.png")
+        pygame.image.load("images/left/left1.png").convert_alpha(),
+        pygame.image.load("images/left/left2.png").convert_alpha(),
+        pygame.image.load("images/left/left3.png").convert_alpha(),
+        pygame.image.load("images/left/left4.png").convert_alpha()
     ]
     walk_right = [
-        pygame.image.load("images/right/right1.png"),
-        pygame.image.load("images/right/right2.png"),
-        pygame.image.load("images/right/right3.png"),
-        pygame.image.load("images/right/right4.png")
+        pygame.image.load("images/right/right1.png").convert_alpha(),
+        pygame.image.load("images/right/right2.png").convert_alpha(),
+        pygame.image.load("images/right/right3.png").convert_alpha(),
+        pygame.image.load("images/right/right4.png").convert_alpha()
     ]
+    enemy = pygame.image.load("images/left/left1.png").convert_alpha()
     player_anim_count = 0
 
     bg_sound = pygame.mixer.Sound("sounds/les.mp3")
@@ -34,13 +35,29 @@ if __name__ == '__main__':
 
     player_pos = False
 
+    enemy_timer = pygame.USEREVENT + 1
+    pygame.time.set_timer(enemy_timer, 2500)
+    enemy_list = []
+
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == enemy_timer:
+                enemy_list.append(enemy.get_rect(topleft=(1215, 625)))
+
         screen.blit(bg, (bg_x, 0))
         screen.blit(bg, (bg_x + 1200, 0))
+
+        player_hit_box = walk_left[0].get_rect(topleft=(player_x, player_y))
+        if enemy_list:
+            for i in enemy_list:
+                screen.blit(enemy, i)
+                i.x -= 10
+
+                if player_hit_box.colliderect(i):
+                    print('wasted')
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -51,9 +68,9 @@ if __name__ == '__main__':
             player_pos = False
         else:
             if player_pos:
-                screen.blit(pygame.image.load("images/left/left1.png"), (player_x, player_y))
+                screen.blit(pygame.image.load("images/left/left1.png").convert_alpha(), (player_x, player_y))
             else:
-                screen.blit(pygame.image.load("images/right/right1.png"), (player_x, player_y))
+                screen.blit(pygame.image.load("images/right/right1.png").convert_alpha(), (player_x, player_y))
 
         if keys[pygame.K_LEFT] and player_x > 0:
             player_x -= player_speed
@@ -81,6 +98,7 @@ if __name__ == '__main__':
         bg_x -= 2
         if bg_x == -1200:
             bg_x = 0
+
         clock.tick(fps)
         pygame.display.update()
     pygame.quit()
