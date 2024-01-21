@@ -5,6 +5,8 @@ if __name__ == '__main__':
     size = width, height = 1200, 800
     screen = pygame.display.set_mode(size)
     bg = pygame.image.load("images/bg.png").convert()
+    icon = pygame.image.load("images/icon.png")
+    pygame.display.set_icon(icon)
     fps = 20
     clock = pygame.time.Clock()
     bg_x = 0
@@ -30,14 +32,34 @@ if __name__ == '__main__':
     player_x = 100
     player_y = 625
 
+    bullet_left = [
+        pygame.image.load("images/bullet/fire_left1.png").convert_alpha(),
+        pygame.image.load("images/bullet/fire_left2.png").convert_alpha()
+    ]
+    bullet_right = [
+        pygame.image.load("images/bullet/fire_right1.png").convert_alpha(),
+        pygame.image.load("images/bullet/fire_right2.png").convert_alpha()
+    ]
+    bullets = []
+    bullet_count = 0
+
+    gameplay = False
+
     is_jump = False
     jump_count = 10
 
-    player_pos = False
+    player_pos = True
+    last_move = True
 
     enemy_timer = pygame.USEREVENT + 1
     pygame.time.set_timer(enemy_timer, 2500)
     enemy_list = []
+
+    lab = pygame.font.Font("images/RubikBurned-Regular.ttf", 100)
+    lose_lab = lab.render('Wasted', True, (255, 255, 255))
+    lab_restart = pygame.font.Font("images/RubikBurned-Regular.ttf", 80)
+    restart_lab = lab_restart.render('Play again', True, (255, 255, 255))
+    invisible_lab_rect = restart_lab.get_rect(topleft=(380, 400))
 
     running = True
     while running:
@@ -47,58 +69,103 @@ if __name__ == '__main__':
             if event.type == enemy_timer:
                 enemy_list.append(enemy.get_rect(topleft=(1215, 625)))
 
-        screen.blit(bg, (bg_x, 0))
-        screen.blit(bg, (bg_x + 1200, 0))
+        if gameplay:
+            screen.blit(bg, (bg_x, 0))
+            screen.blit(bg, (bg_x + 1200, 0))
 
-        player_hit_box = walk_left[0].get_rect(topleft=(player_x, player_y))
-        if enemy_list:
-            for i in enemy_list:
-                screen.blit(enemy, i)
-                i.x -= 10
+            player_hit_box = walk_left[0].get_rect(topleft=(player_x, player_y))
+            if enemy_list:
+                for el, i in enumerate(enemy_list):
+                    screen.blit(enemy, i)
+                    i.x -= 10
 
-                if player_hit_box.colliderect(i):
-                    print('wasted')
+                    if i.x < -10:
+                        enemy_list.pop(el)
+                        print('kill')
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            screen.blit(walk_left[player_anim_count], (player_x, player_y))
-            player_pos = True
-        elif keys[pygame.K_RIGHT]:
-            screen.blit(walk_right[player_anim_count], (player_x, player_y))
-            player_pos = False
-        else:
-            if player_pos:
-                screen.blit(pygame.image.load("images/left/left1.png").convert_alpha(), (player_x, player_y))
+                    if player_hit_box.colliderect(i):
+                        gameplay = False
+
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                screen.blit(walk_left[player_anim_count], (player_x, player_y))
+                player_pos = False
+                last_move = False
+            elif keys[pygame.K_RIGHT]:
+                screen.blit(walk_right[player_anim_count], (player_x, player_y))
+                player_pos = True
+                last_move = True
             else:
-                screen.blit(pygame.image.load("images/right/right1.png").convert_alpha(), (player_x, player_y))
-
-        if keys[pygame.K_LEFT] and player_x > 0:
-            player_x -= player_speed
-        elif keys[pygame.K_RIGHT]:
-            player_x += player_speed
-
-        if not is_jump:
-            if keys[pygame.K_SPACE]:
-                is_jump = True
-        else:
-            if jump_count >= -10:
-                if jump_count > 0:
-                    player_y -= (jump_count) ** 2 / 2
+                if player_pos:
+                    screen.blit(pygame.image.load("images/right/right1.png").convert_alpha(), (player_x, player_y))
                 else:
-                    player_y += (jump_count) ** 2 / 2
-                jump_count -= 1
+                    screen.blit(pygame.image.load("images/left/left1.png").convert_alpha(), (player_x, player_y))
+
+            if keys[pygame.K_LEFT] and player_x > 0:
+                player_x -= player_speed
+            elif keys[pygame.K_RIGHT]:
+                player_x += player_speed
+
+            if not is_jump:
+                if keys[pygame.K_SPACE]:
+                    is_jump = True
             else:
-                jump_count = 10
-                is_jump = False
+                if jump_count >= -10:
+                    if jump_count > 0:
+                        player_y -= (jump_count ** 2) / 2
+                    else:
+                        player_y += (jump_count ** 2) / 2
+                    jump_count -= 1
+                else:
+                    jump_count = 10
+                    is_jump = False
 
-        if player_anim_count == 3:
-            player_anim_count = 0
+            if player_anim_count == 3:
+                player_anim_count = 0
+            else:
+                player_anim_count += 1
+            bg_x -= 2
+            if bg_x == -1200:
+                bg_x = 0
+            if keys[pygame.K_b]:
+                if last_move:
+                    bullets.append(bullet_right[bullet_count].get_rect(topleft=(player_x + 30, player_y + 60)))
+                else:
+                    bullets.append(bullet_left[bullet_count].get_rect(topleft=(player_x + 30, player_y + 60)))
+                bullet_count += 1
+
+            if bullet_count == 1:
+                bullet_count = 0
+            if bullets:
+                for el, i in enumerate(bullets):
+                    if last_move:
+                        for draw in bullet_right:
+                            screen.blit(draw, (i.x, i.y))
+                        i.x += 10
+                    else:
+                        for draw in bullet_left:
+                            screen.blit(draw, (i.x, i.y))
+                        i.x -= 10
+                    if i.x > 1210:
+                         bullets.pop(el)
+
+                    if enemy_list:
+                        for index, enem in enumerate(enemy_list):
+                            if i.colliderect(enem):
+                                enemy_list.pop(index)
+                                bullets.pop(el)
+            clock.tick(fps)
         else:
-            player_anim_count += 1
-        bg_x -= 2
-        if bg_x == -1200:
-            bg_x = 0
+            screen.fill((0, 0, 0))
+            screen.blit(lose_lab, (400, 300))
+            screen.blit(restart_lab, invisible_lab_rect)
 
-        clock.tick(fps)
+            mouse = pygame.mouse.get_pos()
+            if invisible_lab_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                gameplay = True
+                enemy_list.clear()
+                bullets.clear()
+                player_x = 100
+
         pygame.display.update()
     pygame.quit()
