@@ -10,6 +10,31 @@ if __name__ == '__main__':
     fps = 20
     clock = pygame.time.Clock()
     bg_x = 0
+    bullet_left = [
+        pygame.image.load("images/bullet/fire_left1.png").convert_alpha(),
+        pygame.image.load("images/bullet/fire_left2.png").convert_alpha()
+    ]
+    bullet_right = [
+        pygame.image.load("images/bullet/fire_right1.png").convert_alpha(),
+        pygame.image.load("images/bullet/fire_right2.png").convert_alpha()
+    ]
+    def bullet_fly(screen, i, name):
+        global bullet_left, bullet_right
+        for el, i in enumerate(bullets):
+            if name == 'right':
+                for draw in bullet_right:
+                    screen.blit(draw, (i.x, i.y))
+                i.x += 10
+            else:
+                for draw in bullet_left:
+                    screen.blit(draw, (i.x, i.y))
+                i.x -= 10
+    def bullet1(name):
+        d = 0
+        name1 = name
+        for el, i in enumerate(bullets):
+            d = i
+        bullet_fly(screen, d, name1)
     walk_left = [
         pygame.image.load("images/left/left1.png").convert_alpha(),
         pygame.image.load("images/left/left2.png").convert_alpha(),
@@ -31,15 +56,6 @@ if __name__ == '__main__':
     player_speed = 15
     player_x = 100
     player_y = 625
-
-    bullet_left = [
-        pygame.image.load("images/bullet/fire_left1.png").convert_alpha(),
-        pygame.image.load("images/bullet/fire_left2.png").convert_alpha()
-    ]
-    bullet_right = [
-        pygame.image.load("images/bullet/fire_right1.png").convert_alpha(),
-        pygame.image.load("images/bullet/fire_right2.png").convert_alpha()
-    ]
     bullets = []
     bullet_count = 0
 
@@ -49,10 +65,10 @@ if __name__ == '__main__':
     jump_count = 10
 
     player_pos = True
-    last_move = True
+    fireball = 'right'
 
     enemy_timer = pygame.USEREVENT + 1
-    pygame.time.set_timer(enemy_timer, 2500)
+    pygame.time.set_timer(enemy_timer, 25000)
     enemy_list = []
 
     lab = pygame.font.Font("images/RubikBurned-Regular.ttf", 100)
@@ -90,11 +106,11 @@ if __name__ == '__main__':
             if keys[pygame.K_LEFT]:
                 screen.blit(walk_left[player_anim_count], (player_x, player_y))
                 player_pos = False
-                last_move = False
+                fireball = 'left'
             elif keys[pygame.K_RIGHT]:
                 screen.blit(walk_right[player_anim_count], (player_x, player_y))
                 player_pos = True
-                last_move = True
+                fireball = 'right'
             else:
                 if player_pos:
                     screen.blit(pygame.image.load("images/right/right1.png").convert_alpha(), (player_x, player_y))
@@ -128,7 +144,7 @@ if __name__ == '__main__':
             if bg_x == -1200:
                 bg_x = 0
             if keys[pygame.K_b]:
-                if last_move:
+                if fireball == 'right':
                     bullets.append(bullet_right[bullet_count].get_rect(topleft=(player_x + 30, player_y + 60)))
                 else:
                     bullets.append(bullet_left[bullet_count].get_rect(topleft=(player_x + 30, player_y + 60)))
@@ -136,19 +152,11 @@ if __name__ == '__main__':
 
             if bullet_count == 1:
                 bullet_count = 0
-            if bullets:
+            if len(bullets) <= 1:
+                bullet1(fireball)
                 for el, i in enumerate(bullets):
-                    if last_move:
-                        for draw in bullet_right:
-                            screen.blit(draw, (i.x, i.y))
-                        i.x += 10
-                    else:
-                        for draw in bullet_left:
-                            screen.blit(draw, (i.x, i.y))
-                        i.x -= 10
-                    if i.x > 1210:
-                         bullets.pop(el)
-
+                    if i.x > 1210 or i.x < -20:
+                        bullets.pop(el)
                     if enemy_list:
                         for index, enem in enumerate(enemy_list):
                             if i.colliderect(enem):
