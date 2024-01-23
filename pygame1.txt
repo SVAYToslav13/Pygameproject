@@ -18,8 +18,8 @@ if __name__ == '__main__':
         pygame.image.load("images/bullet/fire_right1.png").convert_alpha(),
         pygame.image.load("images/bullet/fire_right2.png").convert_alpha()
     ]
-    mag_left = pygame.image.load("images/left/mag_leftpng (1).png").convert_alpha()
-    mag_right = pygame.image.load("images/right/magright.png").convert_alpha()
+    mag_left = pygame.image.load("images/left/mag_leftpng (1) (1).png").convert_alpha()
+    mag_right = pygame.image.load("images/right/magright (1).png").convert_alpha()
     enemy = pygame.image.load("images/left/zomb_left (1).png").convert_alpha()
     player_anim_count = 0
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     player_speed = 15
     player_x = 100
-    player_y = 600
+    player_y = 625
     bullets = []
     bullet_count = 0
 
@@ -50,6 +50,7 @@ if __name__ == '__main__':
     restart_lab = lab_restart.render('Play again', True, (255, 255, 255))
     invisible_lab_rect = restart_lab.get_rect(topleft=(380, 400))
 
+
     running = True
     while running:
         for event in pygame.event.get():
@@ -57,6 +58,8 @@ if __name__ == '__main__':
                 running = False
             if event.type == enemy_timer:
                 enemy_list.append(enemy.get_rect(topleft=(1215, 634)))
+
+        pygame.mouse.set_visible(False)
 
         if gameplay:
             screen.blit(bg, (bg_x, 0))
@@ -134,9 +137,9 @@ if __name__ == '__main__':
 
             if keys[pygame.K_b]:
                 if fireball == 'right':
-                    bullets.append(bullet_right[bullet_count].get_rect(topleft=(player_x + 155, player_y + 85)))
+                    bullets.append(bullet_right[bullet_count].get_rect(topleft=(player_x + 70, player_y + 70)))
                 else:
-                    bullets.append(bullet_left[bullet_count].get_rect(topleft=(player_x + 100, player_y + 85)))
+                    bullets.append(bullet_left[bullet_count].get_rect(topleft=(player_x + -20, player_y + 70)))
                 bullet_count += 1
 
             if bullet_count == 1:
@@ -157,6 +160,7 @@ if __name__ == '__main__':
                                     bullets.pop(el)
             clock.tick(fps)
         else:
+            pygame.mouse.set_visible(True)
             screen.fill((0, 0, 0))
             screen.blit(lose_lab, (400, 300))
             screen.blit(restart_lab, invisible_lab_rect)
