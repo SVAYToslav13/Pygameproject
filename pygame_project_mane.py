@@ -8,9 +8,9 @@ if __name__ == '__main__':
     size = width, height = 1200, 800
     running = 0
     screen = pygame.display.set_mode(size)
-
     bg = pygame.image.load("images/bg.jpg").convert_alpha()
     icon = pygame.image.load("images/icon.png")
+    pygame.display.set_caption('Полуфабрикат')
     pygame.display.set_icon(icon)
     fps = 20
     clock = pygame.time.Clock()
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     player_pos = True
     fireball = 'right'
-    enemy_d = 1
+    enemy_d = 5
 
     enemy_timer = pygame.USEREVENT + 1
     timer  = 3000
@@ -212,7 +212,7 @@ if __name__ == '__main__':
                     player_speed = 15
                     timer = 2500
                     enemy_speed = 15
-                    enemy_d = 40
+                    enemy_d = 7
                     gameplay = True
                     enemy_list.clear()
                     bullets.clear()
