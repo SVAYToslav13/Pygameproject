@@ -1,0 +1,239 @@
+import pygame
+import datetime
+import csv
+
+
+if __name__ == '__main__':
+    pygame.init()
+    size = width, height = 1200, 800
+    running = 0
+    screen = pygame.display.set_mode(size)
+
+    bg = pygame.image.load("images/bg.jpg").convert_alpha()
+    icon = pygame.image.load("images/icon.png")
+    pygame.display.set_icon(icon)
+    fps = 20
+    clock = pygame.time.Clock()
+    bg_x = 0
+    bullet_left = [
+        pygame.image.load("images/bullet/fire_left1.png").convert_alpha(),
+        pygame.image.load("images/bullet/fire_left2.png").convert_alpha()
+    ]
+    bullet_right = [
+        pygame.image.load("images/bullet/fire_right1.png").convert_alpha(),
+        pygame.image.load("images/bullet/fire_right2.png").convert_alpha()
+    ]
+    mag_left = pygame.image.load("images/left/mag_leftpng (1) (1).png").convert_alpha()
+    mag_right = pygame.image.load("images/right/magright (1).png").convert_alpha()
+    enemy = pygame.image.load("images/left/zomb_left (1).png").convert_alpha()
+    enemy1 = pygame.image.load("images/right/zomb_right (1).png").convert_alpha()
+
+    player_speed = 15
+    player_x = 100
+    player_y = 625
+    bullets = []
+    bullet_count = 0
+    bullets_left = 50
+    enemy_speed = 10
+
+    gameplay = True
+    enemy_die = 0
+    enemy_c = 0
+
+    is_jump = False
+    jump_count = 10
+
+    player_pos = True
+    fireball = 'right'
+    enemy_d = 1
+
+    enemy_timer = pygame.USEREVENT + 1
+    timer  = 3000
+    pygame.time.set_timer(enemy_timer,  timer)
+    enemy_list = []
+
+    result_list = []
+
+    lab_results = pygame.font.Font("images/RubikBurned-Regular.ttf", 80)
+
+    results_lab = lab_results.render('Results', True, (255, 255, 255))
+    invisible_lab_rect4 = results_lab.get_rect(topleft=(470, 600))
+
+    lab = pygame.font.Font("images/RubikBurned-Regular.ttf", 100)
+    menu_lab = lab.render('Hello', True, (255, 255, 255))
+    lab_start = pygame.font.Font("images/RubikBurned-Regular.ttf", 80)
+    start_lab = lab_start.render('Start', True, (255, 255, 255))
+    invisible_lab_rect3 = start_lab.get_rect(topleft=(435, 400))
+
+    lose_lab = lab.render('Wasted', True, (255, 255, 255))
+    lab_restart = pygame.font.Font("images/RubikBurned-Regular.ttf", 80)
+    restart_lab = lab_restart.render('Play again', True, (255, 255, 255))
+    invisible_lab_rect = restart_lab.get_rect(topleft=(380, 400))
+
+    win_lab = lab.render('You win!!!', True, (255, 255, 255))
+    lab_restart1 = pygame.font.Font("images/RubikBurned-Regular.ttf", 80)
+    restart_lab1 = lab_restart.render('Play again', True, (255, 255, 255))
+    restart_lab2 = lab_restart.render('Next level', True, (255, 255, 255))
+    invisible_lab_rect1 = restart_lab1.get_rect(topleft=(435, 400))
+    invisible_lab_rect2 = restart_lab1.get_rect(topleft=(435, 520))
+
+    bg_sound = pygame.mixer.music.load("sounds/music.mp3")
+    pygame.mixer.music.play(-1)
+    time = 0
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == enemy_timer:
+                enemy_list.append(enemy.get_rect(topleft=(1215, 634)))
+            if gameplay and event.type == pygame.KEYUP and event.key == pygame.K_b and bullets_left > 0:
+                if fireball == 'right':
+                    bullets.append(bullet_right[bullet_count].get_rect(topleft=(player_x + 70, player_y + 70)))
+                else:
+                    bullets.append(bullet_left[bullet_count].get_rect(topleft=(player_x + -20, player_y + 70)))
+                bullet_count += 1
+                bullets_left -= 1
+        def write_result(time, kill):
+            with open('result.txt', 'w', encoding='utf-8') as f:
+                file_w = csv.writer(f, lineterminator='\n', delimiter=',')
+                file_w.writerow([time, kill])
+
+        pygame.mouse.set_visible(False)
+        screen.fill((0, 0, 0))
+        screen.blit(menu_lab, (400, 300))
+        screen.blit(start_lab, invisible_lab_rect3)
+        mouse = pygame.mouse.get_pos()
+        if gameplay:
+            screen.blit(bg, (bg_x, 0))
+            screen.blit(bg, (bg_x + 1200, 0))
+            pygame.mixer.music.unpause()
+
+            player_hit_box = mag_left.get_rect(topleft=(player_x, player_y))
+            if enemy_list:
+                for el, i in enumerate(enemy_list):
+                    screen.blit(enemy, i)
+                    i.x -= enemy_speed
+
+                    if i.x < -10:
+                        enemy_list.pop(el)
+
+                    if player_hit_box.colliderect(i):
+                        gameplay = False
+
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                screen.blit(mag_left, (player_x, player_y))
+                player_pos = False
+                fireball = 'left'
+            elif keys[pygame.K_RIGHT]:
+                screen.blit(mag_right, (player_x, player_y))
+                player_pos = True
+                fireball = 'right'
+            else:
+                if player_pos:
+                    screen.blit(mag_right, (player_x, player_y))
+                else:
+                    screen.blit(mag_left, (player_x, player_y))
+
+            if keys[pygame.K_LEFT] and player_x > 0:
+                player_x -= player_speed
+            elif keys[pygame.K_RIGHT]:
+                player_x += player_speed
+
+            if not is_jump:
+                if keys[pygame.K_SPACE]:
+                    is_jump = True
+            else:
+                if jump_count >= -10:
+                    if jump_count > 0:
+                        player_y -= (jump_count ** 2) / 2
+                    else:
+                        player_y += (jump_count ** 2) / 2
+                    jump_count -= 1
+                else:
+                    jump_count = 10
+                    is_jump = False
+            bg_x -= 2
+            if bg_x == -1200:
+                bg_x = 0
+            def bullet_fly_right(screen, name):
+                global bullet_right
+                for el, i in enumerate(bullets):
+                    if name == 'right':
+                        for draw in bullet_right:
+                            screen.blit(draw, (i.x, i.y))
+                        i.x += 50
+            def bullet_fly_left(screen, name):
+                global bullet_left
+                for el, i in enumerate(bullets):
+                    if name == 'left':
+                        for draw in bullet_left:
+                            screen.blit(draw, (i.x, i.y))
+                        i.x -= 50
+            if bullet_count == 1:
+                bullet_count = 0
+            for el, i in enumerate(bullets):
+                if fireball == 'right':
+                    bullet_fly_right(screen, fireball)
+                else:
+                    bullet_fly_left(screen, fireball)
+                if i.x > 1210 or i.x < -20:
+                    bullets.pop(el)
+                if enemy_list:
+                    for index, enem in enumerate(enemy_list):
+                        if i.colliderect(enem):
+                            enemy_list.pop(index)
+                            bullets.pop(el)
+                            enemy_die += 1
+                            enemy_c += 1
+            clock.tick(fps)
+            if enemy_die == enemy_d:
+                gameplay = False
+        else:
+            if enemy_die == enemy_d:
+                pygame.mixer.music.pause()
+                pygame.mouse.set_visible(True)
+                screen.fill((0, 0, 0))
+                screen.blit(win_lab, (400, 300))
+                screen.blit(restart_lab1, invisible_lab_rect1)
+                screen.blit(restart_lab2, invisible_lab_rect2)
+                screen.blit(results_lab, invisible_lab_rect4)
+                mouse = pygame.mouse.get_pos()
+                if invisible_lab_rect1.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                    gameplay = True
+                    enemy_list.clear()
+                    bullets.clear()
+                    player_x = 100
+                    bullets_left = 50
+                    enemy_die = 0
+                if invisible_lab_rect2.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                    bg = pygame.image.load("images/bg1.jpg").convert_alpha()
+                    player_speed = 15
+                    timer = 2500
+                    enemy_speed = 15
+                    enemy_d = 40
+                    gameplay = True
+                    enemy_list.clear()
+                    bullets.clear()
+                    player_x = 100
+                    bullets_left = 45
+                    enemy_die = 0
+            else:
+                pygame.mouse.set_visible(True)
+                screen.fill((0, 0, 0))
+                screen.blit(lose_lab, (400, 300))
+                screen.blit(restart_lab, invisible_lab_rect)
+                screen.blit(results_lab, invisible_lab_rect4)
+                mouse = pygame.mouse.get_pos()
+                if invisible_lab_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                    gameplay = True
+                    enemy_list.clear()
+                    bullets.clear()
+                    player_x = 100
+            time = datetime.datetime.now()
+            write_result(time, enemy_c)
+            result_list.append((time, enemy_c))
+            enemy_c = 0
+        pygame.display.update()
+    pygame.quit()
